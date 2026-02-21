@@ -19,11 +19,11 @@ Doing so we acheived this:
 
 # Data
 1. Main question is, "Where did you find the data train the model?"
-   Answer: We didn't find any suitable dataset that could work for our purpose. So we thought of creating the dataset on our own. We recorded videos of 1 second for signs that were quick to make, converted them into ".npy" format for model training. 
+Answer: We didn't find any suitable dataset that could work for our purpose. So we thought of creating the dataset on our own. We recorded videos of 1 second for signs that were quick to make, converted them into ".npy" format for model training. 
 
 > .npy files are easy to store and manage. Yes, we can't figure out which image it is but surely model does.
 
 2. How many signs have we trained?
-   Answer: Around 15-20 signs and we are still working on increasing the accuracy per sign and number of signs.
-4. How much data you have used?
-   Answer: Approximately, 1500 images per sign at this stage. 
+Answer: Around 15-20 signs and we are still working on increasing the accuracy per sign and number of signs.
+3. How much data you have used?
+Answer: Approximately, 1500 images per sign at this stage. 
