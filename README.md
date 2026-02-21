@@ -19,11 +19,18 @@ Doing so we acheived this:
 
 # Data
 1. Main question is, "Where did you find the data train the model?"
-Answer: We didn't find any suitable dataset that could work for our purpose. So we thought of creating the dataset on our own. We recorded videos of 1 second for signs that were quick to make, converted them into ".npy" format for model training. 
+- Answer: We didn't find any suitable dataset that could work for our purpose. So we thought of creating the dataset on our own. We recorded videos of 1 second for signs that were quick to make, converted them into ".npy" format for model training. 
 
 > .npy files are easy to store and manage. Yes, we can't figure out which image it is but surely model does.
 
 2. How many signs have we trained?
-Answer: Around 15-20 signs and we are still working on increasing the accuracy per sign and number of signs.
+- Answer: Around 15-20 signs and we are still working on increasing the accuracy per sign and number of signs.
 3. How much data you have used?
-Answer: Approximately, 1500 images per sign at this stage. 
+- Answer: Approximately, 1500 images per sign at this stage. 
+4. How did we record these many data?
+- Answer: We ran a python script that asks for the name of the sign, captures video for 1 second, stores it in the folder of the sign's name in the numpy format. Each second contains 30 fps leading to 30 images for 1 sign with actual sequence of movement and the static image of sign.
+
+> We need 2 things here: Motion and Clarity. LSTM is a sequential model which is specifically made to remember the order to data, here we use static images to give model the high quality image of how the hand sign will look like. Secondly, video sequence will provide the motion of signs wehn being made.
+
+# Scope
+We think that LSTM model will be useful for long sentences considering its capability of remembering the order of data. But, we might be wrong or lack knowledge in this terms so we are open to any kind of contributions and collaborations.
