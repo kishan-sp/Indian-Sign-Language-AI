@@ -1,3 +1,8 @@
+# Version History
+- ISL_Model_v1 - 20 signs
+
+---
+
 # Indian Sign Language AI
 
 A machine learning model designed to recognize, translate, and teach Indian Sign Language (ISL), bridging the communication gap between the Deaf community and the hearing world.
@@ -37,7 +42,7 @@ We couldn't find a suitable existing dataset for our specific needs, so we decid
 Currently, the model recognizes around **15 to 20 signs**. We are actively working on increasing both the accuracy of these signs and our overall vocabulary.
 
 **3. How much data was used?**
-At this stage, we have captured approximately **1,500 frames/images per sign**.
+At this stage, we have captured approximately **1,500 frames or images per sign**.
 
 **4. How did we record all this data?**
 We wrote a custom Python script to automate the process. The script prompts the user for the sign's name, captures exactly 1 second of video, and saves the landmark data into a designated folder in NumPy format. Because we record at 30 FPS, each 1-second capture yields 30 frames per sign, capturing both the static pose and the actual sequence of movement.
