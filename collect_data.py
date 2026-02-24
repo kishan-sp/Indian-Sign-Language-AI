@@ -4,7 +4,7 @@ collect_data.py
 ISL Recognition System — Interactive Data Collection Tool
 
 Captures hand keypoint sequences from webcam and saves them as .npy
-files into MP_Data_Combined/ for LSTM training.
+files into NP_Data_Combined/ for LSTM training.
 
 Usage
 -----
@@ -36,7 +36,7 @@ from mediapipe.tasks.python import vision
 # ─────────────────────────── Configuration ───────────────────────────
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-COMBINED_DIR = os.path.join(BASE_DIR, "MP_Data_Combined")
+COMBINED_DIR = os.path.join(BASE_DIR, "NP_Data_Combined")
 LABEL_MAP_PATH = os.path.join(BASE_DIR, "label_map.json")
 HAND_MODEL_PATH = os.path.join(BASE_DIR, "hand_landmarker.task")
 
@@ -223,7 +223,7 @@ def draw_saved_flash(image):
 # ─────────────────────────── Label Map ───────────────────────────────
 
 def update_label_map():
-    """Rebuild label_map.json from MP_Data_Combined/ directory."""
+    """Rebuild label_map.json from NP_Data_Combined/ directory."""
     os.makedirs(COMBINED_DIR, exist_ok=True)
     classes = sorted([
         d for d in os.listdir(COMBINED_DIR)
