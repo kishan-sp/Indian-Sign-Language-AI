@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISL LSTM Neural Network Visualizer & Interview Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Pure OLED Black with Muted, Professional Accents (No Neons) */
+      --bg-dark: #000000;
+      --card-bg: #09090b;
+      --card-border: #27272a;
+      --card-hover: #18181b;
+      
+      --accent-blue: #38bdf8;
+      --accent-purple: #a78bfa;
+      --accent-green: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f87171;
+      --accent-indigo: #818cf8;
+
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --text-sub: #71717a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #000000;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--card-border);
+      background: #000000;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--accent-blue);
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Badges & Stats */
+    .stats-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: #09090b;
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stat-pill .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+    }
+
+    .stat-pill strong {
+      color: var(--accent-blue);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 2.5rem 0;
+      background: #000000;
+      border-bottom: 1px solid var(--card-border);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.8rem 1.2rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--accent-blue);
+      border-bottom-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    /* Main Container */
+    main {
+      padding: 2rem 2.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      background: #000000;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid Layouts */
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: #3f3f46;
+      background: var(--card-hover);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .layer-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 600;
+      background: #18181b;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tensor-shape {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-blue);
+      margin: 0.5rem 0;
+      background: rgba(56, 189, 248, 0.08);
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      display: inline-block;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 0.5rem;
+    }
+
+    .param-count {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .param-count span {
+      color: var(--text-muted);
+    }
+
+    /* SVG Canvas */
+    .canvas-container {
+      background: #000000;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .canvas-toolbar {
+      padding: 0.85rem 1.25rem;
+      background: #09090b;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      z-index: 10;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Outfit', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+
+    .btn.primary {
+      background: var(--accent-blue);
+      color: #000;
+      border-color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .btn.primary:hover {
+      opacity: 0.9;
+    }
+
+    #networkSvg {
+      width: 100%;
+      height: 480px;
+      display: block;
+      background: #000000;
+    }
+
+    .node-group {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .node-group:hover circle.neuron-node {
+      stroke-width: 3;
+    }
+
+    .synapse-line {
+      stroke: #27272a;
+      stroke-width: 1;
+      transition: stroke 0.3s ease;
+    }
+
+    /* LSTM Details */
+    .lstm-box {
+      background: #09090b;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .gates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .gate-card {
+      background: #121215;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .gate-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .math-formula {
+      font-family: 'JetBrains Mono', monospace;
+      background: #000000;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--accent-blue);
+      margin: 0.6rem 0;
+      border: 1px solid #27272a;
+    }
+
+    /* Classes */
+    .classes-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .class-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      background: #121215;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .class-chip:hover {
+      background: #18181b;
+      color: #fff;
+      border-color: #3f3f46;
+    }
+
+    /* Interview Revision Tab Styles */
+    .interview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .interview-card {
+      background: #09090b;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .interview-card.highlight {
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .q-badge {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 700;
+      width: fit-content;
+      text-transform: uppercase;
+    }
+
+    .q-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.35;
+    }
+
+    .code-comparison {
+      background: #000000;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+
+    .pro-pitch {
+      background: #121215;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.15rem;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: #d4d4d8;
+    }
+
+    .pro-pitch strong {
+      color: var(--accent-blue);
+    }
+
+    /* Inspector floating drawer */
+    .inspector-panel {
+      position: fixed;
+      bottom: 2rem;
+      right: 2.5rem;
+      background: #09090b;
+      border: 1px solid #3f3f46;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95);
+      max-width: 380px;
+      z-index: 200;
+      display: none;
+      animation: slideUp 0.2s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(15px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .inspector-panel h4 {
+      font-size: 1rem;
+      color: var(--accent-blue);
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-inspector {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .close-inspector:hover {
+      color: #fff;
+    }
+
+    @media (max-width: 900px) {
+      header { padding: 1rem 1.5rem; }
+      main { padding: 1.5rem; }
+      .tab-nav { padding: 0.75rem 1.5rem 0; }
+      .interview-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-title">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+        </svg>
+      </div>
+      <div>
+        <h1>ISL Recognition Neural Architecture</h1>
+        <div class="brand-subtitle">Pure Black • 126D Coordinate Normalization → 3-Layer Stacked LSTM</div>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-pill">
+        <div class="dot"></div>
+        <span>Total Params:</span> <strong>205,110</strong>
+      </div>
+      <div class="stat-pill">
+        <span>Sequence:</span> <strong>30 Frames (1.0s)</strong>
+      </div>
+      <div class="stat-pill">
+        <span>Feature Vector:</span> <strong>126 / Frame</strong>
+      </div>
+      <div class="stat-pill">
+        <span>Vocabulary:</span> <strong>22 Signs</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('interview-view')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Interview Revision & Design Decisions
+    </button>
+    <button class="tab-btn" onclick="switchTab('network-view')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      Interactive Network & Synapses
+    </button>
+    <button class="tab-btn" onclick="switchTab('pipeline-view')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Layer Breakdown & Tensor Shapes
+    </button>
+    <button class="tab-btn" onclick="switchTab('lstm-view')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Inside the LSTM Memory Cell
+    </button>
+    <button class="tab-btn" onclick="switchTab('classes-view')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Sign Language Vocabulary (22)
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- TAB 1: INTERVIEW REVISION & DESIGN DECISIONS (DEFAULT TAB) -->
+    <div id="interview-view" class="tab-content active">
+      <div class="interview-grid">
+
+        <!-- Card 1: Top-Left & Translation Invariance -->
+        <div class="interview-card highlight">
+          <span class="q-badge" style="background: rgba(56, 189, 248, 0.12); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.25);">
+            TRANSLATION NORMALIZATION
+          </span>
+          <div class="q-title">The "Top-Left" Origin Problem & Wrist Anchor</div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+            Webcam screens place <code>(0,0)</code> at the <strong>top-left corner</strong>. If you make a thumbs-up on the left of your webcam vs the right, raw numbers are completely different:
+          </p>
+          <div class="code-comparison">
+            <span style="color: var(--accent-rose);"># Left of screen:</span> Wrist=(0.20, 0.30), Thumb=(0.20, 0.15)<br>
+            <span style="color: var(--accent-rose);"># Right of screen:</span> Wrist=(0.80, 0.70), Thumb=(0.80, 0.55)<br>
+            <span style="color: #71717a;">→ Model overfits to WHERE you sit, not hand shape!</span><br><br>
+            <span style="color: var(--accent-green);"># Solution: Anchor to Wrist (P_rel = P_raw - Wrist):</span><br>
+            Left:  (0.20-0.20, 0.15-0.30) = <strong style="color: var(--accent-blue);">[0.0, -0.15]</strong><br>
+            Right: (0.80-0.80, 0.55-0.70) = <strong style="color: var(--accent-blue);">[0.0, -0.15]</strong><br>
+            <span style="color: var(--accent-green);">✓ 100% Identical anywhere on screen (Translation Invariant)</span>
+          </div>
+          <div class="pro-pitch">
+            <strong>Interview Takeaway:</strong> Subtracting the wrist coordinate transforms the hand into its own local coordinate system where Wrist = $(0,0,0)$. The neural network becomes blind to screen position and focuses purely on joint geometry.
+          </div>
+        </div>
+
+        <!-- Card 2: Z-Index & Scale Normalization (NEW) -->
+        <div class="interview-card highlight">
+          <span class="q-badge" style="background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.25);">
+            DEPTH & SCALE NORMALIZATION
+          </span>
+          <div class="q-title">Why Translation Fails for Z-Depth & How Scale Fixes It</div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+            Translation normalization ($P - Wrist$) shifts the origin, but <strong>does not fix perspective foreshortening or camera distance</strong>. As you lean in, $X, Y, Z$ spans expand; as you lean back, they shrink.
+          </p>
+          <div class="code-comparison">
+            <span style="color: var(--text-muted);"># The Normalizing Scalar:</span><br>
+            d_i = sqrt(x_i^2 + y_i^2 + z_i^2)  <span style="color: #71717a;"># 3D Euclidean distance</span><br>
+            <strong style="color: var(--accent-amber);">max_dist = max(d_i)</strong>        <span style="color: #71717a;"># Max radius to furthest point</span><br><br>
+            <span style="color: var(--accent-green);"># Divide all 21 (x, y, z) coordinates by max_dist:</span><br>
+            relative /= max_dist<br>
+            <span style="color: #71717a;">→ Furthest point (Middle Finger Tip #12) = 1.0</span><br>
+            <span style="color: #71717a;">→ All 21 landmarks lie within unit sphere R ≤ 1.0</span>
+          </div>
+          <div class="pro-pitch">
+            <strong>What is the Scalar?</strong> The scalar is <code>max_dist</code>: the maximum 3D Euclidean straight-line distance from the wrist to the furthest landmark on that hand. Dividing $X, Y,$ and $Z$ by this single scalar preserves true 3D hand proportions while making depth and distance scale-invariant.
+          </div>
+        </div>
+
+        <!-- Card 3: "Removed" vs "Zero-Centered" -->
+        <div class="interview-card">
+          <span class="q-badge" style="background: rgba(167, 139, 250, 0.12); color: var(--accent-purple); border: 1px solid rgba(167, 139, 250, 0.25);">
+            TECHNICAL NUANCE
+          </span>
+          <div class="q-title">"Removed" vs "Zero-Centered" Landmark 0</div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+            Casual documentation often says <em>"we removed the wrist landmark"</em>. A technical interviewer will ask: <em>"Why are there 63 features per hand instead of 60?"</em>
+          </p>
+          <div class="code-comparison">
+            21 landmarks × 3 coords (x,y,z) = <strong>63 values per hand</strong><br>
+            Landmark 0 (Wrist) = <span style="color: var(--accent-blue);">[0.0, 0.0, 0.0]</span><br>
+            Landmarks 1-20 (Fingers) = Relative vector offsets
+          </div>
+          <div class="pro-pitch">
+            <strong>Interview Answer:</strong> <em>"The wrist was anchor-zeroed, not deleted. Retaining Landmark 0 as $[0,0,0]$ preserves standard MediaPipe 21-landmark indexing while completely stripping out global coordinate bias."</em>
+          </div>
+        </div>
+
+        <!-- Card 4: 126D Flattening Architecture -->
+        <div class="interview-card">
+          <span class="q-badge" style="background: rgba(52, 211, 153, 0.12); color: var(--accent-green); border: 1px solid rgba(52, 211, 153, 0.25);">
+            ARCHITECTURE & SKEPTIC VIEW
+          </span>
+          <div class="q-title">Was 126D Flattening the Right Choice?</div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+            We flatten Left Hand (63) + Right Hand (63) into a single 126D vector per frame across 30 time steps.
+          </p>
+          <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+            <p><strong style="color: var(--accent-green);">✓ Why it was right:</strong> Seamlessly handles 1-handed signs (absent hand slots are all zeros) and 2-handed signs without needing two model branches. 60+ FPS on CPU.</p>
+            <p style="margin-top: 0.5rem;"><strong style="color: var(--accent-rose);">⚠ The Trade-Off:</strong> Because each hand is normalized to its own wrist, the model loses the exact physical distance <em>between</em> both hands.</p>
+          </div>
+          <div class="pro-pitch">
+            <strong>Pro Proposal for Interview:</strong> <em>"For complex signs where hand proximity matters (e.g. palms touching vs apart), we can append a 3D inter-wrist vector $\vec{V}_{inter} = \vec{P}_{right} - \vec{P}_{left}$ ($126 + 3 = 129\text{D}$) to explicitly preserve inter-hand distance."</em>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Empirical Test Banner -->
+      <div style="margin-top: 1.5rem; background: #09090b; border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 style="color: var(--accent-green); font-size: 1.1rem; font-weight: 700;">Live Inference Verification</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">
+              Verified via <code>realtime_test.py</code> using webcam 30-frame sliding window inference.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="stat-pill">good: <strong>100.0%</strong></span>
+            <span class="stat-pill">house: <strong>100.0%</strong></span>
+            <span class="stat-pill">namaste: <strong>99.9%</strong></span>
+            <span class="stat-pill">afternoon: <strong>99.8%</strong></span>
+            <span class="stat-pill">correct: <strong>99.8%</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: INTERACTIVE NETWORK VISUALIZER -->
+    <div id="network-view" class="tab-content">
+      <div class="canvas-container">
+        <div class="canvas-toolbar">
+          <div>
+            <span style="font-weight: 600; font-size: 0.95rem;">Neuron Layer Connectivity Graph</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.75rem;">(Click any layer column or node to inspect tensor dimensions)</span>
+          </div>
+          <div class="btn-group">
+            <button class="btn" onclick="togglePulseAnimation()" id="pulseBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              Pause Signal Pulse
+            </button>
+            <button class="btn primary" onclick="pulseSignals()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              Inject Hand Landmarks
+            </button>
+          </div>
+        </div>
+
+        <svg id="networkSvg" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+
+    <!-- TAB 3: PIPELINE & LAYER BREAKDOWN -->
+    <div id="pipeline-view" class="tab-content">
+      <div class="pipeline-grid">
+
+        <div class="card" onclick="showInspector('Input Layer', 'Shape: (None, 30, 126)', 'Extracts 21 3D landmarks for Left Hand (63) and Right Hand (63) over 30 sequential frames. Hand coordinates are normalized around the wrist and size-invariant.')">
+          <div class="card-header">
+            <span class="layer-badge">INPUT</span>
+            <div style="color: var(--accent-blue);">0 Params</div>
+          </div>
+          <div class="card-title">Hand Keypoints Buffer</div>
+          <div class="tensor-shape">(Batch, 30, 126)</div>
+          <p class="card-desc">30 time steps (1.0 sec @ 30 FPS) of 126 relative coordinates per frame.</p>
+          <div class="param-count">
+            <span>Left: 21×3 = 63</span>
+            <span>Right: 21×3 = 63</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="showInspector('LSTM Layer 1', 'Shape: (None, 30, 64)', '64 hidden units with return_sequences=True. Processes time-series landmark flows and retains sequence length. Includes 30% Dropout & Batch Normalization.')">
+          <div class="card-header">
+            <span class="layer-badge" style="color: var(--accent-purple); border-color: rgba(167,139,250,0.3);">LSTM 1</span>
+            <div style="color: var(--accent-purple);">48,896 Params</div>
+          </div>
+          <div class="card-title">Low-Level Motion LSTM</div>
+          <div class="tensor-shape">(Batch, 30, 64)</div>
+          <p class="card-desc">Extracts frame-to-frame joint velocity and directional shifts.</p>
+          <div class="param-count">
+            <span>Dropout: 0.30</span>
+            <span>BatchNorm: 256 params</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="showInspector('LSTM Layer 2', 'Shape: (None, 30, 128)', '128 hidden units with return_sequences=True. Widest hidden layer designed to capture multi-finger coordination patterns over time.')">
+          <div class="card-header">
+            <span class="layer-badge" style="color: var(--accent-indigo); border-color: rgba(129,140,248,0.3);">LSTM 2</span>
+            <div style="color: var(--accent-indigo);">98,816 Params</div>
+          </div>
+          <div class="card-title">Complex Temporal LSTM</div>
+          <div class="tensor-shape">(Batch, 30, 128)</div>
+          <p class="card-desc">Learns simultaneous two-handed trajectories and rhythmic motions.</p>
+          <div class="param-count">
+            <span>Dropout: 0.30</span>
+            <span>BatchNorm: 512 params</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="showInspector('LSTM Layer 3', 'Shape: (None, 64)', '64 hidden units with return_sequences=False. Condenses temporal sequence of 30 frames down into a single summary vector representing the entire sign.')">
+          <div class="card-header">
+            <span class="layer-badge" style="color: var(--accent-green); border-color: rgba(52,211,153,0.3);">LSTM 3</span>
+            <div style="color: var(--accent-green);">49,408 Params</div>
+          </div>
+          <div class="card-title">Sequence Bottleneck LSTM</div>
+          <div class="tensor-shape">(Batch, 64)</div>
+          <p class="card-desc">Collapses sequence dimension (30 → 1) into an embedded semantic vector.</p>
+          <div class="param-count">
+            <span>Dropout: 0.30</span>
+            <span>BatchNorm: 256 params</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="showInspector('Dense MLP Head', 'Dense(64) -> Dropout(0.3) -> Dense(32)', 'Fully connected classification layers with ReLU activations. Maps the LSTM representation to feature decision boundaries.')">
+          <div class="card-header">
+            <span class="layer-badge" style="color: var(--accent-amber); border-color: rgba(251,191,36,0.3);">DENSE MLP</span>
+            <div style="color: var(--accent-amber);">6,240 Params</div>
+          </div>
+          <div class="card-title">Dense Feature Classifier</div>
+          <div class="tensor-shape">(Batch, 32)</div>
+          <p class="card-desc">Non-linear feature projection using ReLU activations.</p>
+          <div class="param-count">
+            <span>Dense(64): 4,160</span>
+            <span>Dense(32): 2,080</span>
+          </div>
+        </div>
+
+        <div class="card" onclick="showInspector('Softmax Output', 'Shape: (None, 22)', 'Produces normalized probability distribution across all 22 sign classes. Argmax selects predicted ISL sign.')">
+          <div class="card-header">
+            <span class="layer-badge" style="color: var(--accent-rose); border-color: rgba(248,113,113,0.3);">OUTPUT</span>
+            <div style="color: var(--accent-rose);">726 Params</div>
+          </div>
+          <div class="card-title">Softmax Probability Head</div>
+          <div class="tensor-shape">(Batch, 22)</div>
+          <p class="card-desc">Class probability distribution for 22 signs in label_map.json.</p>
+          <div class="param-count">
+            <span>Weights: 32×22 = 704</span>
+            <span>Biases: 22</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 4: INSIDE THE LSTM CELL -->
+    <div id="lstm-view" class="tab-content">
+      <div class="lstm-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.35rem; font-weight: 700; color: #fff;">Long Short-Term Memory (LSTM) Cell Anatomy</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.3rem;">
+              How each neuron inside our 3 LSTM layers remembers, updates, and forgets hand gesture history over 30 time steps.
+            </p>
+          </div>
+          <div class="layer-badge" style="background: #18181b; color: #fff;">
+            Memory Cell State: Cₜ | Hidden State: hₜ
+          </div>
+        </div>
+
+        <div class="gates-grid">
+          <div class="gate-card">
+            <span class="gate-badge" style="background: rgba(248,113,113,0.12); color: var(--accent-rose);">1. FORGET GATE</span>
+            <h4 style="font-size: 1.05rem; margin-bottom: 0.3rem;">What to discard?</h4>
+            <div class="math-formula">fₜ = σ(W_f · [hₜ₋₁, xₜ] + b_f)</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
+              Decides what percentage of old hand positions to forget (e.g. discarding rest position once a gesture begins). Output is between 0 and 1.
+            </p>
+          </div>
+
+          <div class="gate-card">
+            <span class="gate-badge" style="background: rgba(56,189,248,0.12); color: var(--accent-blue);">2. INPUT GATE</span>
+            <h4 style="font-size: 1.05rem; margin-bottom: 0.3rem;">What to update?</h4>
+            <div class="math-formula">iₜ = σ(W_i · [hₜ₋₁, xₜ] + b_i)</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
+              Filters which incoming landmark changes in frame <code>t</code> are significant enough to write into the memory belt.
+            </p>
+          </div>
+
+          <div class="gate-card">
+            <span class="gate-badge" style="background: rgba(251,191,36,0.12); color: var(--accent-amber);">3. CANDIDATE CELL</span>
+            <h4 style="font-size: 1.05rem; margin-bottom: 0.3rem;">New information candidate</h4>
+            <div class="math-formula">C̃ₜ = tanh(W_c · [hₜ₋₁, xₜ] + b_c)</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
+              Computes a vector of new candidate values ranging between -1 and +1 to be added to the cell state.
+            </p>
+          </div>
+
+          <div class="gate-card">
+            <span class="gate-badge" style="background: rgba(52,211,153,0.12); color: var(--accent-green);">4. CELL UPDATE & OUTPUT</span>
+            <h4 style="font-size: 1.05rem; margin-bottom: 0.3rem;">Emitting current gesture</h4>
+            <div class="math-formula">Cₜ = fₜ * Cₜ₋₁ + iₜ * C̃ₜ<br>hₜ = σ(W_o · [hₜ₋₁, xₜ] + b_o) * tanh(Cₜ)</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
+              Updates the long-term memory belt $C_t$ and produces the hidden state vector $h_t$ passed to the next frame or higher layer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: VOCABULARY -->
+    <div id="classes-view" class="tab-content">
+      <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">22 ISL Sign Classes Recognized by the Model</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          These classes are dynamically loaded from <code>label_map.json</code> and trained using 126-D hand landmarks.
+        </p>
+
+        <div class="classes-wrap" id="classesWrap">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="margin-top: 2rem; background: #000000; border-radius: 8px; padding: 1.25rem; border: 1px solid var(--card-border);">
+          <h4 style="font-size: 0.95rem; color: var(--accent-blue); margin-bottom: 0.5rem;">Model Training Hyperparameters</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+            <div><span style="color: var(--text-sub);">Optimizer:</span> Adam (lr=0.001)</div>
+            <div><span style="color: var(--text-sub);">Loss:</span> Categorical Crossentropy</div>
+            <div><span style="color: var(--text-sub);">Batch Size:</span> 32</div>
+            <div><span style="color: var(--text-sub);">Max Epochs:</span> 150</div>
+            <div><span style="color: var(--text-sub);">Early Stop:</span> Patience = 20</div>
+            <div><span style="color: var(--text-sub);">LR Reduce:</span> Patience = 8, Factor = 0.5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Interactive Inspector Drawer -->
+  <div class="inspector-panel" id="inspectorPanel">
+    <h4>
+      <span id="inspectTitle">Layer Inspector</span>
+      <button class="close-inspector" onclick="closeInspector()">&times;</button>
+    </h4>
+    <div class="tensor-shape" id="inspectShape" style="margin-bottom: 0.75rem;">(None, 30, 126)</div>
+    <p id="inspectDesc">Layer details will be shown here.</p>
+  </div>
+
+  <script>
+    const SIGN_CLASSES = [
+      "aboard", "afternoon", "bad", "bye", "camera", "car", "correct", 
+      "daughter", "evening", "father", "food", "good", "hello", "house", 
+      "i", "iloveyou", "man", "mother", "namaste", "pen", "son", "woman"
+    ];
+
+    const classesWrap = document.getElementById("classesWrap");
+    SIGN_CLASSES.forEach((cls, i) => {
+      const chip = document.createElement("div");
+      chip.className = "class-chip";
+      chip.innerHTML = `<span style="color: var(--accent-blue); font-weight: 700;">#${i}</span> ${cls}`;
+      chip.onclick = () => {
+        showInspector(`Class #${i}: ${cls}`, `Label Index: ${i}`, `Recognized by Softmax node #${i} of the output layer. Trained with 30-frame hand gesture keypoints.`);
+      };
+      classesWrap.appendChild(chip);
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add("active");
+
+      const btns = Array.from(document.querySelectorAll(".tab-btn"));
+      const activeBtn = btns.find(b => b.getAttribute("onclick")?.includes(tabId));
+      if (activeBtn) activeBtn.classList.add("active");
+    }
+
+    function showInspector(title, shape, desc) {
+      document.getElementById("inspectTitle").innerText = title;
+      document.getElementById("inspectShape").innerText = shape;
+      document.getElementById("inspectDesc").innerText = desc;
+      document.getElementById("inspectorPanel").style.display = "block";
+    }
+
+    function closeInspector() {
+      document.getElementById("inspectorPanel").style.display = "none";
+    }
+
+    // SVG Network Graph (Muted Professional Palette)
+    const svg = document.getElementById("networkSvg");
+    let isPulseActive = true;
+
+    const layers = [
+      { name: "Input (126D)", color: "#38bdf8", count: 8, label: "x(t) Landmarks", shape: "(None, 30, 126)" },
+      { name: "LSTM 1 (64)", color: "#a78bfa", count: 7, label: "Seq LSTM-64", shape: "(None, 30, 64)" },
+      { name: "LSTM 2 (128)", color: "#818cf8", count: 9, label: "Seq LSTM-128", shape: "(None, 30, 128)" },
+      { name: "LSTM 3 (64)", color: "#34d399", count: 6, label: "Vector LSTM-64", shape: "(None, 64)" },
+      { name: "Dense (64+32)", color: "#fbbf24", count: 5, label: "MLP ReLUs", shape: "(None, 32)" },
+      { name: "Output (22)", color: "#f87171", count: 7, label: "Softmax (22)", shape: "(None, 22)" },
+    ];
+
+    const layerX = [120, 320, 520, 720, 920, 1080];
+    const nodeCoords = [];
+
+    function renderNetwork() {
+      svg.innerHTML = "";
+      nodeCoords.length = 0;
+      const height = 480;
+
+      layers.forEach((layer, lIdx) => {
+        const x = layerX[lIdx];
+        const count = layer.count;
+        const spacing = 36;
+        const startY = (height - (count - 1) * spacing) / 2;
+
+        const coords = [];
+        for (let i = 0; i < count; i++) {
+          coords.push({ x, y: startY + i * spacing });
+        }
+        nodeCoords.push(coords);
+
+        const textTop = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textTop.setAttribute("x", x);
+        textTop.setAttribute("y", 35);
+        textTop.setAttribute("text-anchor", "middle");
+        textTop.setAttribute("fill", layer.color);
+        textTop.setAttribute("font-size", "12");
+        textTop.setAttribute("font-weight", "600");
+        textTop.setAttribute("font-family", "'Outfit', sans-serif");
+        textTop.textContent = layer.name;
+        svg.appendChild(textTop);
+
+        const textSub = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textSub.setAttribute("x", x);
+        textSub.setAttribute("y", 52);
+        textSub.setAttribute("text-anchor", "middle");
+        textSub.setAttribute("fill", "#71717a");
+        textSub.setAttribute("font-size", "10");
+        textSub.setAttribute("font-family", "'JetBrains Mono', monospace");
+        textSub.textContent = layer.shape;
+        svg.appendChild(textSub);
+      });
+
+      for (let l = 0; l < nodeCoords.length - 1; l++) {
+        const currLayer = nodeCoords[l];
+        const nextLayer = nodeCoords[l + 1];
+
+        currLayer.forEach((from) => {
+          nextLayer.forEach((to) => {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", from.x);
+            line.setAttribute("y1", from.y);
+            line.setAttribute("x2", to.x);
+            line.setAttribute("y2", to.y);
+            line.setAttribute("class", "synapse-line");
+            svg.appendChild(line);
+          });
+        });
+      }
+
+      nodeCoords.forEach((layerNodes, lIdx) => {
+        const layerInfo = layers[lIdx];
+        layerNodes.forEach((node, nIdx) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "node-group");
+          g.setAttribute("onclick", `showInspector('${layerInfo.name}', '${layerInfo.shape}', 'Neuron #${nIdx + 1} in ${layerInfo.name}. ${layerInfo.label}')`);
+
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", node.x);
+          circle.setAttribute("cy", node.y);
+          circle.setAttribute("r", 7.5);
+          circle.setAttribute("fill", "#09090b");
+          circle.setAttribute("stroke", layerInfo.color);
+          circle.setAttribute("stroke-width", "1.75");
+          circle.setAttribute("class", "neuron-node");
+          g.appendChild(circle);
+
+          svg.appendChild(g);
+        });
+      });
+    }
+
+    renderNetwork();
+
+    let pulseInterval = null;
+
+    function createSignalPulse(startX, startY, endX, endY, color) {
+      if (!isPulseActive) return;
+      const pulse = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      pulse.setAttribute("r", "3");
+      pulse.setAttribute("fill", color);
+      svg.appendChild(pulse);
+
+      const startTime = performance.now();
+      const duration = 550 + Math.random() * 300;
+
+      function animate(time) {
+        const progress = (time - startTime) / duration;
+        if (progress < 1 && isPulseActive) {
+          const currX = startX + (endX - startX) * progress;
+          const currY = startY + (endY - startY) * progress;
+          pulse.setAttribute("cx", currX);
+          pulse.setAttribute("cy", currY);
+          requestAnimationFrame(animate);
+        } else {
+          pulse.remove();
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function pulseSignals() {
+      for (let l = 0; l < nodeCoords.length - 1; l++) {
+        setTimeout(() => {
+          const fromNodes = nodeCoords[l];
+          const toNodes = nodeCoords[l + 1];
+          const color = layers[l].color;
+
+          for (let i = 0; i < 3; i++) {
+            const f = fromNodes[Math.floor(Math.random() * fromNodes.length)];
+            const t = toNodes[Math.floor(Math.random() * toNodes.length)];
+            createSignalPulse(f.x, f.y, t.x, t.y, color);
+          }
+        }, l * 200);
+      }
+    }
+
+    function togglePulseAnimation() {
+      isPulseActive = !isPulseActive;
+      const btn = document.getElementById("pulseBtn");
+      if (isPulseActive) {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause Signal Pulse`;
+        startAutoPulse();
+      } else {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Resume Signal Pulse`;
+        clearInterval(pulseInterval);
+      }
+    }
+
+    function startAutoPulse() {
+      clearInterval(pulseInterval);
+      pulseInterval = setInterval(pulseSignals, 1500);
+    }
+
+    startAutoPulse();
+  </script>
+</body>
+</html>
