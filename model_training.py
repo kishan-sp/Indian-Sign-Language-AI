@@ -34,7 +34,7 @@ from tensorflow.keras.optimizers import Adam            # type: ignore
 
 from data_preprocessing import preprocess, SEQUENCE_LENGTH, NUM_FEATURES
 
-# ─────────────────────────── Configuration ───────────────────────────
+# Configuration
 
 MODEL_SAVE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "isl_lstm_model.h5"
@@ -49,7 +49,7 @@ LR_REDUCE_PATIENCE = 8
 LR_REDUCE_FACTOR = 0.5
 
 
-# ─────────────────────────── Model Builder ───────────────────────────
+# Model Builder
 
 def build_model(
     sequence_length: int,
@@ -102,7 +102,7 @@ def build_model(
     return model
 
 
-# ─────────────────────────── Training ────────────────────────────────
+# Training
 
 def train_model(model, X_train, X_test, y_train, y_test):
     """Train with EarlyStopping, LR reduction, and checkpointing."""
@@ -141,7 +141,7 @@ def train_model(model, X_train, X_test, y_train, y_test):
     return history
 
 
-# ─────────────────────────── Evaluation ──────────────────────────────
+# Evaluation
 
 def evaluate_model(model, X_test, y_test, actions):
     """Print classification report and save confusion matrix plot."""
@@ -205,7 +205,7 @@ def save_training_plots(history):
     print("[INFO] Training plots saved → accuracy_plot.png, loss_plot.png")
 
 
-# ─────────────────────────── Main ────────────────────────────────────
+# Main
 
 def main() -> None:
     """End-to-end: preprocess → build → train → evaluate → save."""
